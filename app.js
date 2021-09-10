@@ -10,25 +10,39 @@ document.getElementById('input_btn').addEventListener('click', function(){
     }
     else{     
         let cart = localStorage.getItem('cart');
-        let localData = '';
         if(cart=== null){
-            localData = {};
-            localData[inputFieldValue] = price * quantity;
-            const localDataStringify = JSON.stringify(localData);
+            let cart = [];
+            let localData = {};
+            localData['Product Name'] = inputFieldValue;
+            localData['Quantity'] = quantity;
+            localData['Product Price'] = price * quantity;
+            cart.push(localData);
+            const localDataStringify = JSON.stringify(cart);
             localStorage.setItem('cart',localDataStringify);
             emptyContent();
             displayDataOnLoad();  
         }
         else{
-            localDataParse = JSON.parse(cart);
-                if(localDataParse[inputFieldValue]){
-                    localDataParse[inputFieldValue] += price * quantity;
+            let localDataParse = JSON.parse(localStorage.getItem("cart"));
+            let obj = localDataParse.find(o => o['Product Name'] === inputFieldValue);
+                if(obj){
+                    const index = localDataParse.findIndex(product=>product['Product Name']===inputFieldValue); 
+                    obj['Product Name'] = inputFieldValue;
+                    obj['Quantity'] += quantity;
+                    obj['Product Price'] += price * quantity;
+                    localDataParse.splice(index,1,obj);  
+                    const localDataStringify = JSON.stringify(localDataParse);
+                    localStorage.setItem('cart',localDataStringify);
                 }
                 else{
-                    localDataParse[inputFieldValue] = price * quantity;
-                }
-            const localDataStringify = JSON.stringify(localDataParse);
-            localStorage.setItem('cart',localDataStringify);
+                    let newData={};
+                    newData['Product Name'] = inputFieldValue;
+                    newData['Quantity'] = quantity;
+                    newData['Product Price'] = price * quantity;
+                    localDataParse.push(newData) ;
+                    const localDataStringify = JSON.stringify(localDataParse);
+                    localStorage.setItem('cart',localDataStringify);     
+                } 
             emptyContent();
             displayDataOnLoad();
         } 
@@ -37,7 +51,6 @@ document.getElementById('input_btn').addEventListener('click', function(){
         quantityField.value = '';
     }   
 });
-
 const emptyContent = () => {
     const displayData = document.getElementById('display_data');
     displayData.textContent="";
@@ -45,15 +58,15 @@ const emptyContent = () => {
 const displayDataOnLoad = ()=>{
   const loadData =  localStorage.getItem('cart');
   const loadDataParse = JSON.parse(loadData);
-  for (const item in loadDataParse) {
+  console.log(loadDataParse)
+  for (const item1 of loadDataParse) {
+    console.log(item1)
     const displayData = document.getElementById('display_data');
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${item}</td>
-    <td id='${item}'></td>`;
+    tr.innerHTML = `<td>${item1['Product Name']}</td>
+    <td>${item1['Quantity']}</td>
+    <td>${item1['Product Price']}</td>`;
     displayData.appendChild(tr);
-    const itemField = document.getElementById(`${item}`);
-    const productPriceField = document.getElementById("")
-    itemField.innerText = loadDataParse[item];
   }
 };
 displayDataOnLoad();
